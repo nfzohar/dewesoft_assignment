@@ -99,7 +99,7 @@ class CalendarEventController extends Controller
         // Get the API client and construct the service object.
         $googleClient = self::getGoogleClientObject();
         $googleClient->setAccessToken(self::getClient()->getAccessToken());
-        $service = new Google_Service_Calendar($googleClient);        
+        $service = new \Google_Service_Calendar($googleClient);        
 
         $optParams = array(
             'orderBy' => 'startTime',

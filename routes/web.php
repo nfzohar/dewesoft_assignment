@@ -17,7 +17,7 @@ Route::get('/', function () {
 });
 
 // Redirect route for authentiation.
-Route::get('/authenticate', function (Request $request) {    
+Route::get('/api', function (Request $request) {    
     if(!$request) {
         CalendarEventController::requestNewAuthorization($request);
     }   
