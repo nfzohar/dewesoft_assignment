@@ -2,7 +2,10 @@
 /public/hot
 /public/storage
 /storage/*.key
+/storage/calendarAPI/credentials.json
+/storage/calendarAPI/token.json
 /vendor
+.env
 .env.backup
 .phpunit.result.cache
 Homestead.json
@@ -11,3 +14,4 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
