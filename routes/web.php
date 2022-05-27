@@ -1,25 +1,18 @@
 <?php
 
-use Illuminate\Http\Request;
-use App\Models\CalendarEvent;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Redirect;
-use App\Http\Controllers\CalendarEventController;
+use App\Http\Controllers\GoogleCalendarController;
 
-// Main route.
-Route::get('/', function () {
+// Main route
+Route::get('/calendar-event-list', 'App\Http\Controllers\GoogleCalendarController@index');
 
-    return view('calendar_events', [
-        'heading' => 'DeweSoft Project: employee assignment',
-        'sub_heading' => 'Calendar Event List',
-        'calendar_events' => CalendarEvent::loadEventList()
-    ]);
-});
+Route::get('/', 'App\Http\Controllers\GoogleCalendarController@getResources');
 
-// Redirect route for authentiation.
-Route::get('/api', function (Request $request) {    
-    if(!$request) {
-        CalendarEventController::requestNewAuthorization($request);
-    }   
-    return Redirect::to("/");  
-});
+Route::get('/api', 'App\Http\Controllers\GoogleCalendarController@store');
+
+Route::get('/', 'App\Http\Controllers\GoogleCalendarController@connect');
+
+Route::get('/api', 'App\Http\Controllers\GoogleCalendarController@store');
+
+// Route to get the resource.
+Route::get('/get-resource', 'App\Http\Controllers\GoogleCalendarController@getResources');

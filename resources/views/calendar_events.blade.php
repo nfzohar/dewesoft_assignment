@@ -14,8 +14,8 @@
     <link href="https://getbootstrap.com/docs/5.2/examples/list-groups/" rel="canonical">
 </head>
 <body>
-    <h1 class="m-4 row justify-content-center"> {{ $heading }} </h1>
-    <h2 class="row justify-content-center"> {{ $sub_heading }} </h2>
+    <h1 class="m-4 row justify-content-center">DeweSoft Project: employee assignment</h1>
+    <h2 class="row justify-content-center">Calendar Event List</h2>
 
     <ol class="list-group w-auto">
        
@@ -39,6 +39,5 @@
             @endforeach
         @endif 
     </ol>
-
 </body>
 </html>
