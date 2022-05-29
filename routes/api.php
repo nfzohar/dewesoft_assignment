@@ -17,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Route to get the events resource.
+Route::get('/events', 'App\Http\Controllers\GoogleCalendarController@getResources');

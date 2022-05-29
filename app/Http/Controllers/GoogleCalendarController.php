@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use DateTime;
 use App\Models\GoogleCalendar;
-
+use Illuminate\Support\Facades\DB;
 
 class GoogleCalendarController extends Controller
 {
@@ -13,12 +14,10 @@ class GoogleCalendarController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index() {
         $events = self::getResources();
-        $eventsList = [];
-
-        //dd($events);
+        
+        /*$eventsList = [];
 
         foreach ($events as $event) {
             array_push($eventsList,
@@ -27,10 +26,10 @@ class GoogleCalendarController extends Controller
                 'description' => $event['description'],
                 'start_date' => $event['start']['dateTime']
             ]);
-        }
+        }*/
 
         return view('calendar_events', [
-            'calendar_events' => $eventsList
+            'calendar_events' => []
         ]);
     }
 
@@ -62,12 +61,100 @@ class GoogleCalendarController extends Controller
     }
 
     /**
-     * Fetch the resources from google calendar.
+     * Compares data from APi and data old data from the database.
+     * Deletes data from database, not present in the API.
+     *
+     * @return \Illuminate\Http\Response
      */
-    public static function getResources() {
+    public static function deleteOldFromDatabase() {
         // Get the authorized client object and fetch the resources.
         $client = GoogleCalendar::oauth();
-        return GoogleCalendar::getResource($client);
+        // Get new event list from the API.
+        $newEventsList = GoogleCalendar::getResource($client);
+        // Get old event list from database.
+        $eventsListFromDatabase = self::getFromDatabase();
+
+        foreach ($eventsListFromDatabase as $eventFromDatabase) {
+            if(!(in_array($eventFromDatabase, $newEventsList))) {
+                DB::table('calendar_events')->delete($eventFromDatabase->id);
+            }
+        }     
+    }
+
+
+    /**
+     * Get list of events from Calendar, write them to database.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public static function writeToDatabase() {
+        // Get the authorized client object and fetch the resources.
+        $client = GoogleCalendar::oauth();
+        $eventsList = GoogleCalendar::getResource($client);
+
+        foreach ($eventsList as $eventsListing) {
+            // Check if the listing is already in the database.
+            $existsIneDatabase = DB::table('calendar_events')
+            ->where('event_title', '=', $eventsListing['summary'])
+            ->where('event_start_time', '=', $eventsListing['start']['dateTime'])
+            ->where('event_description', '=', $eventsListing['description'])
+            ->first();
+
+            if(empty($existsIneDatabase)){
+                DB::table('calendar_events')->insertGetId(
+                    array(
+                        'event_title' => $eventsListing['summary'],
+                        'event_start_time' => new DateTime($eventsListing['start']['dateTime']),
+                        'event_description' => $eventsListing['description']
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * Get event list from database.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public static function getFromDatabase() {
+        $eventsList = [];
+
+        // Build the SELECT query.
+        $listFromDatabase = DB::table('calendar_events')
+        ->select('id', 'event_title', 'event_start_time', 'event_description')
+        ->orderBy('event_start_time', 'desc')->get(); 
+
+        foreach ($listFromDatabase as $listingFromDatabase) {
+            // Format the date to [00 Month Year].
+            $listingFromDatabase->event_start_time = 
+            date_format(new DateTime($listingFromDatabase->event_start_time), 'd F o');
+ 
+            array_push($eventsList, $listingFromDatabase);
+        }
+
+        return $eventsList;
+    }
+
+
+    /**
+     * Get list of events from Calendar, write them to database.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public static function getResources() {
+
+        // Delete old data from the database.
+        self::deleteOldFromDatabase();
+        // Write new data to database.
+        self::writeToDatabase();
+        // Get updated data from database.
+        $eventsListFromDatabase = self::getFromDatabase();
+
+        return response()->json([
+            'status' => true,
+            'events' => $eventsListFromDatabase
+        ]);
     }
 
 }

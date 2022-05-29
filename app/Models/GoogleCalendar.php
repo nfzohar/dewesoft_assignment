@@ -4,34 +4,36 @@ namespace App\Models;
 
 use Google_Client;
 use Google_Service_Calendar;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class GoogleCalendar 
+class GoogleCalendar extends JsonResource
 {
-    // 
+    /**
+     * Variable with the value of set request scope.
+    */ 
     private static $scopeToBeRequested = "https://www.googleapis.com/auth/calendar.readonly";
 
     /**
      * Returns the currently set scope to be requested.
      * @return string|array
      */
-    public static function getscopeToBeRequested()
-    {
+    public static function getscopeToBeRequested() {
         return self::$scopeToBeRequested;
     }
 
     /**
      * Sets a new scope to be requested.
+     * 
+     * @param $newScopeToBeRequested A new scope for the request.
      */
-    public static function setscopeToBeRequested($newScopeToBeRequested)
-    {
+    public static function setscopeToBeRequested($newScopeToBeRequested) {
         self::$scopeToBeRequested = $newScopeToBeRequested;
     }
 
     /*
      * Create getClient function. 
      */ 	
-	public static function getClient()
-    {
+	public static function getClient() {
         $client = new Google_Client();
         $client->setScopes(self::getscopeToBeRequested());
         $client->setAuthConfig(storage_path('calendarAPI/client_secret.json'));
@@ -69,7 +71,10 @@ class GoogleCalendar
      * Loads previously authorized token from a file, if it exists. The 
      * file client_secret_generated.json stores the user’s access and 
      * refresh tokens, and is created automatically when the 
-     * authorization flow completes for the first time. 
+     * authorization flow completes for the first time.
+     * 
+     * @param Google_Client $client The authorized client object.
+     * @return array List of events.
      */						
     public static function getResource($client) {
         //$client = self::getClient();
@@ -83,7 +88,22 @@ class GoogleCalendar
         );
 
         $results = $service->events->listEvents($calendarId, $optParams);
-        //dd($results->getItems());        
+
         return $results->getItems();
+    }
+
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return array
+     */
+    public function toArray($request) {
+        return [
+            'id' => $request->id,
+            'title' => $request->title,
+            'start_date' => $request->start_date,
+            'description' => $request->body
+        ];
     }
 }

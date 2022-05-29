@@ -17,27 +17,8 @@
     <h1 class="m-4 row justify-content-center">DeweSoft Project: employee assignment</h1>
     <h2 class="row justify-content-center">Calendar Event List</h2>
 
-    <ol class="list-group w-auto">
-       
-        <button class="align-content-center bg-white"><a class="text-black" href="/">Refresh<a></button>
-        
-        @if (!$calendar_events) 
-             <li class="list-group-item">
-                    <h4 style="text-align: center;">There are no events to show.</h4> 
-            </li>   
-        @else
-            @foreach ($calendar_events as $calendar_event)
-                <li class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
-                    <div class="d-flex gap-2 w-100 justify-content-between">
-                        <div>
-                            <h6 class="mb-0">{{ $calendar_event['title'] }}</h6>
-                            <p class="mb-0 opacity-75 limit-width">{{ $calendar_event['description'] }}</p>
-                        </div>
-                        <small class="text-nowrap">{{ $calendar_event['start_date'] }}</small>
-                    </div>
-                </li>
-            @endforeach
-        @endif 
-    </ol>
+    <div id="app"></div>
+
+    <script src="{{ asset('js/app.js')}}" type="text/javascript"></script>
 </body>
 </html>
